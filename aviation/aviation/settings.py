@@ -101,14 +101,23 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
     'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend'
-    ]
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Aviation API',
+    'TITLE': 'Airport API',
+    'DESCRIPTION': 'API for managing flights, tickets, and users',
     'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'AUTHENTICATION_WHITELIST': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
 }
 
 # Password validation

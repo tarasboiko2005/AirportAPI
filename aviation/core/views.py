@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from .models import User, Country, Airport, Airline, Airplane, Flight, Ticket
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import IsAuthenticated
 from .serializers import (
     UserSerializer, CountrySerializer, AirportSerializer,
     AirlineSerializer, AirplaneSerializer, FlightSerializer, TicketSerializer
@@ -31,9 +32,11 @@ class FlightViewSet(viewsets.ModelViewSet):
     serializer_class = FlightSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['origin', 'destination', 'status', 'airplane']
+    permission_classes = [IsAuthenticated]
 
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.select_related('flight','user').all()
     serializer_class = TicketSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['flight', 'user', 'status']
+    permission_classes = [IsAuthenticated]
