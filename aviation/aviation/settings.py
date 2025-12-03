@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'core',
+    'debug_toolbar',
+    'django_filters',
+
 ]
 
 AUTH_USER_MODEL = 'core.User'
@@ -52,6 +55,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
 ]
 
 ROOT_URLCONF = 'aviation.urls'
@@ -91,6 +101,9 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ]
 }
 
 SPECTACULAR_SETTINGS = {
