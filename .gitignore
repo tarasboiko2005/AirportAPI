@@ -1,14 +1,15 @@
-# Python
 *.pyc
 __pycache__/
+.env
 
-# Virtual environment
 .venv/
 
-# Django
 db.sqlite3
 *.log
 
-# IDE
 .idea/
 .vscode/
+
+pgdata/
+*.sqlite3
+

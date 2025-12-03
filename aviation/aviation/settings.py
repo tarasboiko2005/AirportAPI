@@ -90,12 +90,11 @@ WSGI_APPLICATION = 'aviation.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'aviation_db',
-        'USER': 'postgres',
-        'PASSWORD': 'Qwest2005',
-        'HOST': 'localhost',
-        'PORT': '5432',
-
+        'NAME': 'airport_db',
+        'USER': 'airport_user',
+        'PASSWORD': 'airport_pass',
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
 

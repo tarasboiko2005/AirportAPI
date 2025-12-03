@@ -17,7 +17,6 @@ router.register(r'flights', FlightViewSet)
 router.register(r'tickets', TicketViewSet)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('', include(router.urls)),
     path('__debug__/', include(debug_toolbar.urls)),
 ]
