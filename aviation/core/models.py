@@ -60,8 +60,5 @@ class Ticket(models.Model):
     booked_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-
-
         unique_together = ('flight', 'seat_number')
-
     def __str__(self): return f"Ticket {self.id} for {self.user.username}"
