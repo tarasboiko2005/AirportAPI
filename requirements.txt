@@ -1,0 +1,7 @@
+Django==5.2.8
+djangorestframework
+djangorestframework-simplejwt
+drf-spectacular
+django-filter
+psycopg2-binary
+django-debug-toolbar
