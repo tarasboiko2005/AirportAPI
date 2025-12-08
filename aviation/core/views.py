@@ -54,7 +54,6 @@ class LoginView(TokenObtainPairView):
             logger.warning("Login failed for user %s", request.data.get("username"))
         return response
 
-
 # Users through ViewSet
 @extend_schema_view(
     list=extend_schema(tags=['Users']),
@@ -115,6 +114,7 @@ class AirportListCreateView(
 ):
     queryset = Airport.objects.select_related('country').all()
     serializer_class = AirportSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -131,6 +131,7 @@ class AirportDetailView(
 ):
     queryset = Airport.objects.select_related('country').all()
     serializer_class = AirportSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk, *args, **kwargs):
         return self.retrieve(request, pk=pk, *args, **kwargs)
@@ -148,6 +149,7 @@ class AirportDetailView(
 @extend_schema(tags=['Airlines'])
 class AirlineListView(APIView):
     serializer_class = AirlineSerializer
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         airlines = Airline.objects.all()
         serializer = AirlineSerializer(airlines, many=True)
@@ -163,6 +165,7 @@ class AirlineListView(APIView):
 @extend_schema(tags=['Airlines'])
 class AirlineDetailView(APIView):
     serializer_class = AirlineSerializer
+    permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         airline = get_object_or_404(Airline, pk=pk)
         serializer = AirlineSerializer(airline)
@@ -209,6 +212,7 @@ class FlightViewSet(viewsets.ModelViewSet):
 @extend_schema(tags=['Tickets'])
 class TicketListView(APIView):
     serializer_class = TicketSerializer
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         tickets = Ticket.objects.select_related('flight', 'user').all()
         serializer = self.serializer_class(tickets, many=True)
@@ -227,7 +231,8 @@ class TicketListView(APIView):
 
 @extend_schema(tags=['Tickets'])
 class TicketDetailView(APIView):
-    serializer_class = TicketSerializer   # ✅ правильний атрибут
+    serializer_class = TicketSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         ticket = get_object_or_404(Ticket, pk=pk)
@@ -267,5 +272,3 @@ class TicketDetailView(APIView):
 class AirplaneViewSet(viewsets.ModelViewSet):
     queryset = Airplane.objects.select_related('airline').all()
     serializer_class = AirplaneSerializer
-
-
