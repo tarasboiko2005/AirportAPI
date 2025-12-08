@@ -13,3 +13,6 @@ db.sqlite3
 .idea/
 .vscode/
 .env
+
+# Django logs
+debug.log

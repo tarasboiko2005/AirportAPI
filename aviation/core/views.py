@@ -9,6 +9,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import generics, mixins
 from django.shortcuts import get_object_or_404
+import logging
 
 from .models import User, Country, Airport, Airline, Airplane, Flight, Ticket
 from .serializers import (
@@ -16,10 +17,22 @@ from .serializers import (
     AirlineSerializer, AirplaneSerializer, FlightSerializer, TicketSerializer, RegisterSerializer
 )
 
+logger = logging.getLogger(__name__)
+
 @extend_schema(tags=['Authentication'])
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            logger.info("New user registered: %s (id=%s)", user.username, user.id)
+            return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+        else:
+            logger.error("Registration failed: %s", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CustomLoginSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -34,7 +47,13 @@ class LoginView(TokenObtainPairView):
 
     @extend_schema(tags=['Authentication'])
     def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            logger.info("User %s logged in successfully", request.data.get("username"))
+        else:
+            logger.warning("Login failed for user %s", request.data.get("username"))
+        return response
+
 
 # Users through ViewSet
 @extend_schema_view(
@@ -192,27 +211,32 @@ class TicketListView(APIView):
     serializer_class = TicketSerializer
     def get(self, request):
         tickets = Ticket.objects.select_related('flight', 'user').all()
-        serializer = TicketSerializer(tickets, many=True)
+        serializer = self.serializer_class(tickets, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = TicketSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            logger.info("Ticket created successfully")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error("Ticket creation failed: %s", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @extend_schema(tags=['Tickets'])
 class TicketDetailView(APIView):
-    serializer_class = TicketSerializer
+    serializer_class = TicketSerializer   # ✅ правильний атрибут
+
     def get(self, request, pk):
         ticket = get_object_or_404(Ticket, pk=pk)
-        serializer = TicketSerializer(ticket)
+        serializer = self.serializer_class(ticket)
         return Response(serializer.data)
 
     def put(self, request, pk):
         ticket = get_object_or_404(Ticket, pk=pk)
-        serializer = TicketSerializer(ticket, data=request.data)
+        serializer = self.serializer_class(ticket, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -220,7 +244,7 @@ class TicketDetailView(APIView):
 
     def patch(self, request, pk):
         ticket = get_object_or_404(Ticket, pk=pk)
-        serializer = TicketSerializer(ticket, data=request.data, partial=True)
+        serializer = self.serializer_class(ticket, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
