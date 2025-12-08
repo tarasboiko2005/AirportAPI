@@ -26,9 +26,10 @@ INSTALLED_APPS = [
     'core',
     'debug_toolbar',
     'django_filters',
+    'users'
 ]
 
-AUTH_USER_MODEL = 'core.User'
+AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
