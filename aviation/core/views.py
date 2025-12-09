@@ -166,7 +166,7 @@ class TicketListView(APIView):
     serializer_class = TicketSerializer
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        tickets = Ticket.objects.select_related('flight', 'user').all()
+        tickets = Ticket.objects.select_related('flight', 'order').all()
         serializer = self.serializer_class(tickets, many=True)
         return Response(serializer.data)
 
