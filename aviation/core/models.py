@@ -1,11 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-
-class User(AbstractUser):
-    class Role(models.TextChoices):
-        ADMIN = 'admin', 'Admin'
-        USER = 'user', 'User'
-    role = models.CharField(max_length=10, choices=Role.choices, default=Role.USER)
+from django.conf import settings
 
 class Country(models.Model):
     name = models.CharField(max_length=100)
@@ -48,20 +42,20 @@ class Flight(models.Model):
     def __str__(self): return f"Flight {self.number}"
 
 class Ticket(models.Model):
-    class Status(models.TextChoices):
-        BOOKED = 'booked', 'Booked'
-        CANCELLED = 'cancelled', 'Cancelled'
-        USED = 'used', 'Used'
-    flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='tickets')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tickets')
-    seat_number = models.PositiveIntegerField()
+    flight = models.ForeignKey("core.Flight", on_delete=models.CASCADE)
+    seat_number = models.CharField(max_length=10)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.BOOKED)
-    booked_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default="available")
+    order = models.ForeignKey(
+        "orders.Order",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tickets"
+    )
 
     class Meta:
-
-
         unique_together = ('flight', 'seat_number')
 
-    def __str__(self): return f"Ticket {self.id} for {self.user.username}"
+    def __str__(self):
+        return f"Ticket {self.seat_number} for {self.flight.number}"

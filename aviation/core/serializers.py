@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import User, Country, Airport, Airline, Airplane, Flight, Ticket
+from .models import Country, Airport, Airline, Airplane, Flight, Ticket
+from users.models import User
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -8,15 +9,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email', 'password']
 
-        def validate_username(self, value):
-            if User.objects.filter(username=value).exists():
-                raise serializers.ValidationError("This username is already in use.")
-            return value
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("This username is already in use.")
+        return value
 
-        def validate_email(self, value):
-            if User.objects.filter(email=value).exists():
-                raise serializers.ValidationError("This email is already in use.")
-            return value
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This email is already in use.")
+        return value
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -49,4 +50,7 @@ class FlightSerializer(serializers.ModelSerializer):
     class Meta: model = Flight; fields = '__all__'
 
 class TicketSerializer(serializers.ModelSerializer):
-    class Meta: model = Ticket; fields = '__all__'
+    class Meta:
+        model = Ticket
+        fields = ['id', 'seat_number', 'price', 'status', 'flight', 'order']
+        read_only_fields = ['order']

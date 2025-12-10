@@ -1,20 +1,20 @@
-# Використовуємо офіційний Python образ
+# Use official Python image
 FROM python:3.13-slim
 
-# Встановлюємо робочу директорію
+# Set working directory
 WORKDIR /app
 
-# Копіюємо requirements
+# Copy requirements
 COPY requirements.txt /app/
 
-# Встановлюємо залежності
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копіюємо весь код
+# Copy all source code
 COPY . /app/
 
-# Відкриваємо порт
+# Expose port
 EXPOSE 8000
 
-# Запускаємо сервер
+# Run server
 CMD ["python", "aviation/manage.py", "runserver", "0.0.0.0:8000"]
