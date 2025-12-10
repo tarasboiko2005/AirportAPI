@@ -21,4 +21,7 @@ class FlightSerializer(serializers.ModelSerializer):
     class Meta: model = Flight; fields = '__all__'
 
 class TicketSerializer(serializers.ModelSerializer):
-    class Meta: model = Ticket; fields = '__all__'
+    class Meta:
+        model = Ticket
+        fields = ['id', 'seat_number', 'price', 'status', 'flight', 'order']
+        read_only_fields = ['order']
