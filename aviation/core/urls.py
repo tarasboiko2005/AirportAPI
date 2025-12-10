@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 import debug_toolbar
+
 from .views import (
     FlightViewSet, AirplaneViewSet,
     CountryListCreateView, CountryDetailView,
@@ -22,11 +23,11 @@ urlpatterns = [
     path('airports-generic/', AirportListCreateView.as_view(), name='airports-generic'),
     path('airports-generic/<int:pk>/', AirportDetailView.as_view(), name='airport-generic-detail'),
 
-    path('airlines-view/', AirlineListView.as_view(), name='airlines-view'),
-    path('airlines-view/<int:pk>/', AirlineDetailView.as_view(), name='airline-view-detail'),
+    path('airlines/', AirlineListView.as_view(), name='airlines-list'),
+    path('airlines/<int:pk>/', AirlineDetailView.as_view(), name='airlines-detail'),
 
-    path('tickets-view/', TicketListView.as_view(), name='tickets-view'),
-    path('tickets-view/<int:pk>/', TicketDetailView.as_view(), name='ticket-view-detail'),
+    path('tickets/', TicketListView.as_view(), name='tickets-list'),
+    path('tickets/<int:pk>/', TicketDetailView.as_view(), name='tickets-detail'),
 
     path('__debug__/', include(debug_toolbar.urls)),
 ]

@@ -4,8 +4,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import generics, mixins
 from django.shortcuts import get_object_or_404
@@ -102,11 +100,14 @@ class AirportDetailView(
 class AirlineListView(APIView):
     serializer_class = AirlineSerializer
     permission_classes = [IsAuthenticated]
+
+    @extend_schema(operation_id="airlines_list")
     def get(self, request):
         airlines = Airline.objects.all()
         serializer = AirlineSerializer(airlines, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(operation_id="airlines_create")
     def post(self, request):
         serializer = AirlineSerializer(data=request.data)
         if serializer.is_valid():
@@ -118,11 +119,14 @@ class AirlineListView(APIView):
 class AirlineDetailView(APIView):
     serializer_class = AirlineSerializer
     permission_classes = [IsAuthenticated]
+
+    @extend_schema(operation_id="airlines_retrieve")
     def get(self, request, pk):
         airline = get_object_or_404(Airline, pk=pk)
         serializer = AirlineSerializer(airline)
         return Response(serializer.data)
 
+    @extend_schema(operation_id="airlines_update")
     def put(self, request, pk):
         airline = get_object_or_404(Airline, pk=pk)
         serializer = AirlineSerializer(airline, data=request.data)
@@ -131,6 +135,7 @@ class AirlineDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(operation_id="airlines_partial_update")
     def patch(self, request, pk):
         airline = get_object_or_404(Airline, pk=pk)
         serializer = AirlineSerializer(airline, data=request.data, partial=True)
@@ -139,6 +144,7 @@ class AirlineDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(operation_id="airlines_delete")
     def delete(self, request, pk):
         airline = get_object_or_404(Airline, pk=pk)
         airline.delete()
@@ -165,11 +171,14 @@ class FlightViewSet(viewsets.ModelViewSet):
 class TicketListView(APIView):
     serializer_class = TicketSerializer
     permission_classes = [IsAuthenticated]
+
+    @extend_schema(operation_id="tickets_list")
     def get(self, request):
         tickets = Ticket.objects.select_related('flight', 'order').all()
         serializer = self.serializer_class(tickets, many=True)
         return Response(serializer.data)
 
+    @extend_schema(operation_id="tickets_create")
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -180,17 +189,18 @@ class TicketListView(APIView):
             logger.error("Ticket creation failed: %s", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 @extend_schema(tags=['Tickets'])
 class TicketDetailView(APIView):
     serializer_class = TicketSerializer
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(operation_id="tickets_retrieve")
     def get(self, request, pk):
         ticket = get_object_or_404(Ticket, pk=pk)
         serializer = self.serializer_class(ticket)
         return Response(serializer.data)
 
+    @extend_schema(operation_id="tickets_update")
     def put(self, request, pk):
         ticket = get_object_or_404(Ticket, pk=pk)
         serializer = self.serializer_class(ticket, data=request.data)
@@ -199,6 +209,7 @@ class TicketDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(operation_id="tickets_partial_update")
     def patch(self, request, pk):
         ticket = get_object_or_404(Ticket, pk=pk)
         serializer = self.serializer_class(ticket, data=request.data, partial=True)
@@ -207,6 +218,7 @@ class TicketDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(operation_id="tickets_delete")
     def delete(self, request, pk):
         ticket = get_object_or_404(Ticket, pk=pk)
         ticket.delete()
