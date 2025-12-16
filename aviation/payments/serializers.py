@@ -20,3 +20,6 @@ class PaymentSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["status", "created_at", "updated_at"]
+
+class EmptySerializer(serializers.Serializer):
+    pass

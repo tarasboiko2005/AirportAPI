@@ -10,5 +10,5 @@ router.register(r'checkout-session', CheckoutSessionViewSet, basename='checkout-
 urlpatterns = router.urls + [
     path("success", lambda request: HttpResponse("✅ Payment success!")),
     path("cancel", lambda request: HttpResponse("❌ Payment cancel!")),
-    path("webhook/", StripeWebhookView.as_view(), name="stripe-webhook"),
+    path("webhook/", StripeWebhookView.as_view(), name="stripe-webhook")
 ]

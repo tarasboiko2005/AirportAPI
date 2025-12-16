@@ -155,7 +155,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        'core': {  # твій app
+        'core': {
             'handlers': ['file'],
             'level': 'DEBUG',
             'propagate': False,
