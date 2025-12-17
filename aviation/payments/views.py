@@ -16,6 +16,7 @@ from drf_spectacular.utils import extend_schema
 
 from .models import Payment
 from .serializers import PaymentSerializer, CheckoutSessionSerializer
+from orders.models import Order
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -42,13 +43,20 @@ class CheckoutSessionViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        order_id = serializer.validated_data.get("order_id")
+
+        try:
+            order = Order.objects.get(id=order_id, user=request.user)
+        except Order.DoesNotExist:
+            return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
                 'price_data': {
-                    'currency': 'usd',
-                    'product_data': {'name': 'Test Ticket'},
-                    'unit_amount': 2000,
+                    'currency': order.currency.lower(),
+                    'product_data': {'name': f'Order #{order.id}'},
+                    'unit_amount': int(order.amount * 100),  # конвертуємо у центи
                 },
                 'quantity': 1,
             }],
@@ -56,7 +64,9 @@ class CheckoutSessionViewSet(viewsets.ViewSet):
             success_url=settings.STRIPE_SUCCESS_URL,
             cancel_url=settings.STRIPE_CANCEL_URL,
             client_reference_id=request.user.id,
+            metadata={"order_id": str(order.id)},
         )
+
         return Response({'id': session.id, 'url': session.url}, status=status.HTTP_201_CREATED)
 
 @extend_schema(tags=["Payments"])
@@ -81,36 +91,38 @@ class StripeWebhookView(APIView):
             if event['type'] == 'checkout.session.completed':
                 session = event['data']['object']
                 user_id = session.get("client_reference_id")
+                order_id = session.get("metadata", {}).get("order_id")
 
-                if not user_id:
-                    logger.warning("No client_reference_id in session")
+                if not user_id or not order_id:
+                    logger.warning("Missing client_reference_id or order_id")
                     return HttpResponse(status=200)
 
                 try:
                     user = User.objects.get(id=user_id)
-                except User.DoesNotExist:
-                    logger.warning(f"User with id {user_id} not found")
+                    order = Order.objects.get(id=order_id, user=user)
+                except (User.DoesNotExist, Order.DoesNotExist):
+                    logger.warning("User or Order not found")
                     return HttpResponse(status=200)
 
                 if Payment.objects.filter(stripe_payment_intent=session.get("payment_intent")).exists():
                     logger.info("Payment already exists, skipping duplicate")
                     return HttpResponse(status=200)
 
-                stripe_session_id = session.get("id")
-                amount = session.get("amount_total")
-                currency = session.get("currency")
-
                 Payment.objects.update_or_create(
-                    stripe_session_id=stripe_session_id,
+                    stripe_session_id=session.get("id"),
                     defaults={
                         "user": user,
-                        "amount": Decimal(amount) / 100,
-                        "currency": currency,
-                        "status": "completed",
+                        "order": order,
+                        "amount": Decimal(session.get("amount_total")) / 100,
+                        "currency": session.get("currency"),
+                        "status": "paid",
+                        "stripe_payment_intent": session.get("payment_intent"),
                     }
                 )
 
-                logger.info("Payment created successfully")
+                order.status = "completed"
+                order.save()
+                logger.info("Payment and Order updated successfully")
             else:
                 logger.info(f"Ignored event type: {event['type']}")
 

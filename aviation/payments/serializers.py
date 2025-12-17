@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Payment
 
 class CheckoutSessionSerializer(serializers.Serializer):
-    id = serializers.CharField()
+    order_id = serializers.CharField()
 
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
