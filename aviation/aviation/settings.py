@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_filters',
     'users',
-    'orders'
+    'orders',
+    'payments'
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -154,10 +155,16 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        'core': {  # твій app
+        'core': {
             'handlers': ['file'],
             'level': 'DEBUG',
             'propagate': False,
         },
     },
 }
+
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+STRIPE_SUCCESS_URL = os.getenv("STRIPE_SUCCESS_URL", "http://localhost:8000/payments/success")
+STRIPE_CANCEL_URL = os.getenv("STRIPE_CANCEL_URL", "http://localhost:8000/payments/cancel")
