@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import RoadmapView
+from llm.views import NaturalLanguageQueryView
 
 urlpatterns = [
-    path("roadmap", RoadmapView.as_view(), name="llm-roadmap"),
+    path("nl-query/", NaturalLanguageQueryView.as_view(), name="nl-query"),
 ]
