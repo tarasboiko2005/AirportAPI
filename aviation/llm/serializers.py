@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.serializers import CountrySerializer, AirportSerializer, AirlineSerializer, AirplaneSerializer
+from core.serializers import AirportSerializer, AirplaneSerializer
 from core.models import Flight, Ticket
 
 class FlightLLMSerializer(serializers.ModelSerializer):

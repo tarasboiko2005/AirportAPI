@@ -1,6 +1,6 @@
 from typing import Dict, Any, Union, List
 from django.db.models.query import QuerySet
-from core.models import Flight, Ticket, Airport, Country
+from core.models import Flight, Ticket, Airport
 from django.db.models import Q
 
 def execute(action: str, params: Dict[str, Any]) -> Union[
