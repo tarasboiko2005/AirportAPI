@@ -1,6 +1,10 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+from django.core.serializers.json import DjangoJSONEncoder
+
 from llm.services.gemini import stream_response
+from llm.queries import execute
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -16,18 +20,31 @@ class ChatConsumer(AsyncWebsocketConsumer):
             payload = data.get("payload", {})
 
             if msg_type == "user_message":
-                prompt = payload.get("text", "")
+                action = payload.get("action")
+                params = payload.get("params", {})
 
-                async for chunk in stream_response(prompt):
+                if action:
+                    result = await database_sync_to_async(execute)(action, params)
+
+                    if hasattr(result, "values"):
+                        result = list(result.values())
+
                     await self.send(text_data=json.dumps({
-                        "type": "assistant_chunk",
-                        "payload": {"text": chunk}
-                    }))
+                        "type": "db_result",
+                        "payload": result
+                    }, cls=DjangoJSONEncoder))
 
-                await self.send(text_data=json.dumps({
-                    "type": "assistant_complete",
-                    "payload": {"done": True}
-                }))
+                else:
+                    prompt = payload.get("text", "")
+                    async for chunk in stream_response(prompt):
+                        await self.send(text_data=json.dumps({
+                            "type": "assistant_chunk",
+                            "payload": {"text": chunk}
+                        }))
+                    await self.send(text_data=json.dumps({
+                        "type": "assistant_complete",
+                        "payload": {"done": True}
+                    }))
 
             elif msg_type == "ping":
                 await self.send(text_data=json.dumps({"type": "pong"}))

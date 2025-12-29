@@ -1,18 +1,16 @@
-from typing import Dict, Any, Union, List
-from django.db.models.query import QuerySet
-from core.models import Flight, Ticket, Airport
+from typing import Dict, Any, List
 from django.db.models import Q
 
-def execute(action: str, params: Dict[str, Any]) -> Union[
-    QuerySet[Flight], QuerySet[Ticket], List[Dict[str, Any]]
-]:
+def execute(action: str, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+    from core.models import Flight, Ticket, Airport
+
     if action == "search_flights":
         filters = params.get("filters", {}) or {}
         origin = filters.get("origin")
         destination = filters.get("destination")
         date = filters.get("date")
 
-        qs: QuerySet[Flight] = Flight.objects.select_related(
+        qs = Flight.objects.select_related(
             "origin", "destination", "airplane__airline"
         )
 
@@ -46,11 +44,11 @@ def execute(action: str, params: Dict[str, Any]) -> Union[
             qs = qs.order_by(by if order == "asc" else f"-{by}")
 
         limit = params.get("limit", 20)
-        return qs[:limit]
+        return list(qs[:limit].values())
 
     elif action == "search_countries_from_origin":
-        origin = params["filters"].get("origin")
-        date_str = params["filters"].get("date")
+        origin = params.get("filters", {}).get("origin")
+        date_str = params.get("filters", {}).get("date")
 
         qs = Flight.objects.all()
         if origin:
@@ -76,7 +74,7 @@ def execute(action: str, params: Dict[str, Any]) -> Union[
         return list(countries)
 
     elif action == "search_airlines_from_airport":
-        origin = params["filters"].get("origin")
+        origin = params.get("filters", {}).get("origin")
 
         qs = Airport.objects.all()
         if origin:
@@ -95,28 +93,28 @@ def execute(action: str, params: Dict[str, Any]) -> Union[
 
         return airlines
 
-    if action == "search_tickets":
+    elif action == "search_tickets":
         filters = params.get("filters", {})
         flight_id = filters.get("flight_id")
         qs = Ticket.objects.all()
         if flight_id:
             qs = qs.filter(flight_id=flight_id)
-        return qs
+        return list(qs.values())
 
-    if action == "search_available_tickets":
+    elif action == "search_available_tickets":
         filters = params.get("filters", {})
         flight_id = filters.get("flight_id")
         qs = Ticket.objects.filter(status__iexact="available")
         if flight_id:
             qs = qs.filter(flight_id=flight_id)
-        return qs
+        return list(qs.values())
 
-    if action == "search_booked_tickets":
+    elif action == "search_booked_tickets":
         filters = params.get("filters", {})
         flight_id = filters.get("flight_id")
         qs = Ticket.objects.filter(status__iexact="booked")
         if flight_id:
             qs = qs.filter(flight_id=flight_id)
-        return qs
+        return list(qs.values())
 
     return []
