@@ -40,7 +40,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
         order = Order.objects.create(user=user, amount=amount, **validated_data)
 
-        # оновлюємо статус квитків і прив’язуємо їх до ордера
         for ticket in tickets:
             ticket.status = 'booked'
             ticket.order = order

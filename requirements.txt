@@ -6,3 +6,5 @@ django-filter
 psycopg2-binary
 django-debug-toolbar
 python-dotenv
+stripe
+gunicorn
