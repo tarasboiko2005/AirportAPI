@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'users',
     'orders',
     'payments',
-    'llm'
+    'llm',
+    'channels',
+    'chat',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -76,6 +78,8 @@ TEMPLATES = [
         },
     },
 ]
+
+ASGI_APPLICATION = "aviation.asgi.application"
 
 WSGI_APPLICATION = 'aviation.wsgi.application'
 
@@ -189,4 +193,13 @@ STRIPE_SUCCESS_URL = os.getenv("STRIPE_SUCCESS_URL", "http://localhost:8000/paym
 STRIPE_CANCEL_URL = os.getenv("STRIPE_CANCEL_URL", "http://localhost:8000/payments/cancel")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
+}
 

@@ -1,7 +1,9 @@
 import json
+import logging
 from google import genai
 from django.conf import settings
-import logging
+
+logger = logging.getLogger("llm")
 
 class RoadmapGenerator:
     MODEL_NAME = "models/gemini-flash-latest"
@@ -47,7 +49,11 @@ class RoadmapGenerator:
         self.client = genai.Client(api_key=api_key)
 
     def generate(self, topic: str) -> dict:
-        prompt = self.PROMPT_TEMPLATE + f"\nTopic: {topic}\nIMPORTANT: Your output MUST start directly with '{{' and end with '}}'. Do not include any text before or after the JSON."
+
+        prompt = (
+            self.PROMPT_TEMPLATE
+            + f"\nTopic: {topic}\nIMPORTANT: Your output MUST start directly with '{{' and end with '}}'. Do not include any text before or after the JSON."
+        )
 
         response = self.client.models.generate_content(
             model=self.MODEL_NAME,
@@ -55,7 +61,6 @@ class RoadmapGenerator:
         )
 
         text = response.text or ""
-        logger = logging.getLogger("llm")
         logger.warning("🔍 Gemini raw response:\n%s", text)
 
         start = text.find("{")
@@ -86,6 +91,7 @@ class RoadmapGenerator:
         }
 
     def _validate_schema(self, data: dict) -> None:
+
         if not isinstance(data, dict):
             raise ValueError("Roadmap must be a JSON object")
 
@@ -110,3 +116,25 @@ class RoadmapGenerator:
                 raise ValueError("Dependency type must be 'hard' or 'soft'")
             if d["from"] not in titles or d["to"] not in titles:
                 raise ValueError("Dependencies must reference existing skills")
+
+async def stream_response(prompt: str):
+    api_key = settings.GEMINI_API_KEY
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY is missing")
+
+    client = genai.Client(api_key=api_key)
+
+    response = client.models.generate_content_stream(
+        model="models/gemini-flash-latest",
+        contents=prompt,
+    )
+
+    for chunk in response:
+        try:
+            if chunk.candidates:
+                part = chunk.candidates[0].content.parts[0].text
+                if part:
+                    yield part
+        except Exception as e:
+            logger.error("Stream chunk parse failed: %s", e)
+            continue
