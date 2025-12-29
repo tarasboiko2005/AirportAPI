@@ -3,8 +3,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.core.serializers.json import DjangoJSONEncoder
 
-from llm.services.gemini import stream_response
-from llm.queries import execute
+from assistant.services.gemini import stream_response
+from assistant.queries import execute
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):

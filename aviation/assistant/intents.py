@@ -31,18 +31,19 @@ def map_intent(intent: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
     elif "today" in prompt_text:
         params["filters"]["date"] = date.today().isoformat()
 
-    if ("заброньован" in prompt_text and "квит" in prompt_text) or ("booked" in prompt_text and "ticket" in prompt_text):
+    if "booked" in prompt_text and "ticket" in prompt_text:
         return "search_booked_tickets", params
-    if ("вільн" in prompt_text and "квит" in prompt_text) or ("available" in prompt_text and "ticket" in prompt_text):
+    if "available" in prompt_text and "ticket" in prompt_text:
         return "search_available_tickets", params
-    if "квит" in prompt_text or "ticket" in prompt_text:
+    if "ticket" in prompt_text or "tickets" in prompt_text:
         return "search_tickets", params
-    if "рейс" in prompt_text or "flight" in prompt_text or "flights" in prompt_text:
+    if "flight" in prompt_text or "flights" in prompt_text:
         return "search_flights", params
-    if "країн" in prompt_text or "country" in prompt_text or "countries" in prompt_text:
+    if "country" in prompt_text or "countries" in prompt_text:
         return "search_countries_from_origin", params
-    if "авіакомпан" in prompt_text or "airline" in prompt_text or "airlines" in prompt_text:
+    if "airline" in prompt_text or "airlines" in prompt_text:
         return "search_airlines_from_airport", params
+
     if action in [
         "search_flights",
         "search_countries_from_origin",

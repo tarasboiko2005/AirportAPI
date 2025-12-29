@@ -4,25 +4,9 @@ from typing import Dict, Any
 import re
 from datetime import datetime
 
-UA_MONTHS = {
-    "січня": "January",
-    "лютого": "February",
-    "березня": "March",
-    "квітня": "April",
-    "травня": "May",
-    "червня": "June",
-    "липня": "July",
-    "серпня": "August",
-    "вересня": "September",
-    "жовтня": "October",
-    "листопада": "November",
-    "грудня": "December",
-}
-
 logger = logging.getLogger(__name__)
 
 class LLMClientError(Exception):
-    """Custom exception for LLM client errors."""
     pass
 
 class LLMClient:
@@ -66,19 +50,7 @@ class LLMClient:
             except Exception:
                 pass
 
-        match_ua = re.search(r"на (\d{1,2}) (\w+)", lower)
-        if match_ua:
-            day = int(match_ua.group(1))
-            month_ua = match_ua.group(2)
-            if month_ua in UA_MONTHS:
-                month_en = UA_MONTHS[month_ua]
-                try:
-                    dt = datetime.strptime(f"{day} {month_en} 2025", "%d %B %Y")
-                    date_str = dt.strftime("%Y-%m-%d")
-                except Exception:
-                    pass
-
-        if "flight" in lower or "flights" in lower or "рейс" in lower or "польоти" in lower:
+        if "flight" in lower or "flights" in lower:
             return {
                 "action": "search_flights",
                 "filters": {"date": date_str} if date_str else {},
@@ -88,7 +60,7 @@ class LLMClient:
                 "errors": []
             }
 
-        if "countries" in lower or "country" in lower or "країни" in lower or "країна" in lower:
+        if "countries" in lower or "country" in lower:
             return {
                 "action": "search_countries_from_origin",
                 "filters": {"origin": "LWO", **({"date": date_str} if date_str else {})},
@@ -98,7 +70,7 @@ class LLMClient:
                 "errors": []
             }
 
-        if "airlines" in lower or "airline" in lower or "авіакомпанії" in lower or "авіакомпанія" in lower:
+        if "airlines" in lower or "airline" in lower:
             return {
                 "action": "search_airlines_from_airport",
                 "filters": {"origin": "LWO", **({"date": date_str} if date_str else {})},
@@ -108,7 +80,7 @@ class LLMClient:
                 "errors": []
             }
 
-        if "tickets" in lower or "квитки" in lower:
+        if "tickets" in lower or "ticket" in lower:
             return {
                 "action": "search_tickets",
                 "filters": {},
@@ -118,7 +90,7 @@ class LLMClient:
                 "errors": []
             }
 
-        if "available" in lower or "вільні" in lower:
+        if "available" in lower:
             return {
                 "action": "search_available_tickets",
                 "filters": {},
@@ -128,7 +100,7 @@ class LLMClient:
                 "errors": []
             }
 
-        if "booked" in lower or "заброньовані" in lower:
+        if "booked" in lower:
             return {
                 "action": "search_booked_tickets",
                 "filters": {},

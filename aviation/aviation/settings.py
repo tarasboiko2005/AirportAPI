@@ -40,9 +40,7 @@ INSTALLED_APPS = [
     'users',
     'orders',
     'payments',
-    'llm',
-    'channels',
-    'chat',
+    'assistant',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -178,7 +176,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-        'llm': {
+        'assistant': {
             'handlers': ['file'],
             'level': 'DEBUG',
             'propagate': False,

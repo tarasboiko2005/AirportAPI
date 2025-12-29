@@ -3,16 +3,19 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from llm.llm_client import LLMClient, LLMClientError
-from llm.intents import map_intent
-from llm.queries import execute
-
-from core.schema import ok, fail
-from core.i18n import detect_lang, t
+from assistant.llm_client import LLMClient, LLMClientError
+from assistant.intents import map_intent
+from assistant.queries import execute
 from core.logging import get_logger
-from llm.serializers import FlightLLMSerializer, LlmTicketSerializer
+from assistant.serializers import FlightLLMSerializer, LlmTicketSerializer
 
 logger = get_logger(__name__)
+
+def success_response(data, message: str = "Success"):
+    return {"status": "success", "message": message, "data": data}
+
+def error_response(message: str, errors=None):
+    return {"status": "error", "message": message, "errors": errors or [], "data": None}
 
 @extend_schema(
     request={
@@ -38,7 +41,7 @@ logger = get_logger(__name__)
             response={
                 "type": "object",
                 "properties": {
-                    "status": {"type": "string", "example": "ok"},
+                    "status": {"type": "string", "example": "success"},
                     "message": {"type": "string", "example": "Success"},
                     "data": {
                         "type": "array",
@@ -58,7 +61,7 @@ logger = get_logger(__name__)
             response={
                 "type": "object",
                 "properties": {
-                    "status": {"type": "string", "example": "ok"},
+                    "status": {"type": "string", "example": "success"},
                     "message": {"type": "string", "example": "Success"},
                     "data": {
                         "type": "array",
@@ -84,7 +87,7 @@ logger = get_logger(__name__)
         OpenApiExample(
             name="Example response (flights)",
             value={
-                "status": "ok",
+                "status": "success",
                 "message": "Success",
                 "data": [
                     {
@@ -112,7 +115,7 @@ logger = get_logger(__name__)
         OpenApiExample(
             name="Example response (tickets)",
             value={
-                "status": "ok",
+                "status": "success",
                 "message": "Success",
                 "data": [
                     {"seat_number": "12A", "price": "100.00", "status": "available"},
@@ -131,15 +134,11 @@ class NaturalLanguageQueryView(APIView):
 
     def post(self, request):
         prompt = request.data.get("prompt", "")
-        lang = request.data.get("lang") or detect_lang(prompt)
+        lang = "en"
 
         if not prompt.strip():
             return Response(
-                fail(
-                    message=t("intent_unknown", lang),
-                    errors=["Empty prompt"],
-                    lang=lang
-                ),
+                error_response("Unable to understand the query. Please clarify.", ["Empty prompt"]),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -149,11 +148,7 @@ class NaturalLanguageQueryView(APIView):
         except LLMClientError as e:
             logger.error(f"LLM error: {e}")
             return Response(
-                fail(
-                    message=t("intent_unknown", lang),
-                    errors=[str(e)],
-                    lang=lang
-                ),
+                error_response("Unable to understand the query. Please clarify.", [str(e)]),
                 status=status.HTTP_502_BAD_GATEWAY
             )
 
@@ -162,26 +157,22 @@ class NaturalLanguageQueryView(APIView):
 
         if action == "unknown":
             return Response(
-                fail(
-                    message=t("intent_unknown", lang),
-                    errors=intent.get("errors", []),
-                    lang=lang
-                ),
+                error_response("Unable to understand the query. Please clarify.", intent.get("errors", [])),
                 status=status.HTTP_200_OK
             )
 
         results = execute(action, params)
 
         if not results:
-            return Response(ok([], t("no_results", lang), lang), status=status.HTTP_200_OK)
+            return Response(success_response([], "No results found for your query."), status=status.HTTP_200_OK)
 
         if action in ["search_tickets", "search_available_tickets", "search_booked_tickets"]:
             serializer = LlmTicketSerializer(results, many=True)
         elif action == "search_flights":
             serializer = FlightLLMSerializer(results, many=True)
         elif action in ["search_countries_from_origin", "search_airlines_from_airport"]:
-            return Response(ok(results, lang=lang), status=status.HTTP_200_OK)
+            return Response(success_response(results), status=status.HTTP_200_OK)
         else:
-            return Response(ok([], t("no_results", lang), lang), status=status.HTTP_200_OK)
+            return Response(success_response([], "No results found for your query."), status=status.HTTP_200_OK)
 
-        return Response(ok(serializer.data, lang=lang), status=status.HTTP_200_OK)
+        return Response(success_response(serializer.data), status=status.HTTP_200_OK)

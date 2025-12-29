@@ -3,7 +3,7 @@ import logging
 from google import genai
 from django.conf import settings
 
-logger = logging.getLogger("llm")
+logger = logging.getLogger("assistant")
 
 class RoadmapGenerator:
     MODEL_NAME = "models/gemini-flash-latest"
