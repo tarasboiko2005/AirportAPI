@@ -1,62 +1,38 @@
 import json
-from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.db import database_sync_to_async
-from django.core.serializers.json import DjangoJSONEncoder
+import logging
+from channels.generic.websocket import WebsocketConsumer
+from assistant.llm_client import AIService
 
-from assistant.services.gemini import stream_response
-from assistant.queries import execute
+logger = logging.getLogger(__name__)
 
-class ChatConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        await self.accept()
+class ChatConsumer(WebsocketConsumer):
+    def connect(self):
+        self.user = self.scope.get("user")
+        self.service = AIService(user=self.user)
+        self.accept()
+        self.send(text_data=json.dumps({
+            'type': 'connection_established',
+            'message': f"<p>Connected as <b>{getattr(self.user, 'username', 'anonymous')}</b></p>"
+        }))
 
-    async def disconnect(self, close_code):
-        pass
-
-    async def receive(self, text_data):
+    def receive(self, text_data):
         try:
-            data = json.loads(text_data)
-            msg_type = data.get("type")
-            payload = data.get("payload", {})
+            payload = json.loads(text_data)
+            user_msg = payload.get('message', '')
 
-            if msg_type == "user_message":
-                action = payload.get("action")
-                params = payload.get("params", {})
+            self.send(text_data=json.dumps({
+                'type': 'chat',
+                'message': f"<p>You: {user_msg}</p>"
+            }))
 
-                if action:
-                    result = await database_sync_to_async(execute)(action, params)
-
-                    if hasattr(result, "values"):
-                        result = list(result.values())
-
-                    await self.send(text_data=json.dumps({
-                        "type": "db_result",
-                        "payload": result
-                    }, cls=DjangoJSONEncoder))
-
-                else:
-                    prompt = payload.get("text", "")
-                    async for chunk in stream_response(prompt):
-                        await self.send(text_data=json.dumps({
-                            "type": "assistant_chunk",
-                            "payload": {"text": chunk}
-                        }))
-                    await self.send(text_data=json.dumps({
-                        "type": "assistant_complete",
-                        "payload": {"done": True}
-                    }))
-
-            elif msg_type == "ping":
-                await self.send(text_data=json.dumps({"type": "pong"}))
-
-            else:
-                await self.send(text_data=json.dumps({
-                    "type": "error",
-                    "payload": {"message": "Unknown message type"}
-                }))
-
+            chat_answer = self.service.get_response(user_msg)
+            self.send(text_data=json.dumps({
+                'type': 'chat',
+                'message': f"<p>Chat: {chat_answer}</p>"
+            }))
         except Exception as e:
-            await self.send(text_data=json.dumps({
-                "type": "error",
-                "payload": {"message": f"Error: {str(e)}"}
+            logger.error(f"WS receive error: {e}")
+            self.send(text_data=json.dumps({
+                'type': 'error',
+                'message': f"<p>Error: {e}</p>"
             }))
