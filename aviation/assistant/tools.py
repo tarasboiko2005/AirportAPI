@@ -42,7 +42,6 @@ def search_flights(destination: str, departure_city: str = None,
 
     return json.dumps(data)
 
-
 def get_user_orders(email: str):
     orders = Order.objects.filter(user__email__iexact=email).order_by("-created_at")[:5]
 
@@ -68,7 +67,6 @@ def get_user_orders(email: str):
 
     return json.dumps(data)
 
-
 def get_ticket_details(flight_id: int):
     try:
         flight = Flight.objects.get(id=flight_id)
@@ -92,7 +90,6 @@ def get_ticket_details(flight_id: int):
     }
     return json.dumps(response)
 
-
 def map_intent(intent: dict):
     raw_action = intent.get("action") or intent.get("intent") or intent.get("command") or "unknown"
     params = intent.get("params") or intent.get("parameters") or {}
@@ -110,7 +107,6 @@ def map_intent(intent: dict):
 
     action = action_map.get(normalized, "unknown")
     return action, params
-
 
 SUGGESTIONS = {
     "Flights": "Would you like to check available tickets for this flight?",
