@@ -14,7 +14,9 @@ services:
       - key: DEBUG
         value: False
       - key: DJANGO_ALLOWED_HOSTS
-        value: airport-backend.onrender.com
+        value: airport-backend-ug6q.onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://airport-backend-ug6q.onrender.com
       - key: POSTGRES_DB
         sync: false
       - key: POSTGRES_USER
