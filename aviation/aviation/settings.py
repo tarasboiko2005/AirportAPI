@@ -3,12 +3,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables
 load_dotenv()
+
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
 # Security
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -38,7 +39,8 @@ INSTALLED_APPS = [
     'django_filters',
     'users',
     'orders',
-    'payments'
+    'payments',
+    'assistant',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -74,6 +76,8 @@ TEMPLATES = [
         },
     },
 ]
+
+ASGI_APPLICATION = "aviation.asgi.application"
 
 WSGI_APPLICATION = 'aviation.wsgi.application'
 
@@ -128,7 +132,8 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -144,18 +149,34 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'debug.log'),
             'formatter': 'verbose',
+            'maxBytes': 5*1024*1024,
+            'backupCount': 5,
         },
+        'console': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['file', 'console'],
+        'level': 'DEBUG',
     },
     'loggers': {
         'django': {
             'handlers': ['file'],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
         },
         'core': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'assistant': {
             'handlers': ['file'],
             'level': 'DEBUG',
             'propagate': False,
@@ -168,3 +189,15 @@ STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 STRIPE_SUCCESS_URL = os.getenv("STRIPE_SUCCESS_URL", "http://localhost:8000/payments/success")
 STRIPE_CANCEL_URL = os.getenv("STRIPE_CANCEL_URL", "http://localhost:8000/payments/cancel")
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
+}
+

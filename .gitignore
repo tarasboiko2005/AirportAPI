@@ -16,3 +16,5 @@ db.sqlite3
 
 # Django logs
 debug.log
+
+aviation/staticfiles/
