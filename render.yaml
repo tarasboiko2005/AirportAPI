@@ -3,11 +3,10 @@ services:
     name: airport-backend
     env: python
     autoDeploy: true
-    preDeployCommand: python manage.py migrate && python manage.py collectstatic --noinput
     buildCommand: |
       pip install -r requirements.txt
-      python manage.py collectstatic --noinput
       python manage.py migrate
+      python manage.py collectstatic --noinput
     startCommand: uvicorn aviation.asgi:application --host 0.0.0.0 --port $PORT
     envVars:
       - key: SECRET_KEY
