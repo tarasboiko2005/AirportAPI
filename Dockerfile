@@ -9,7 +9,6 @@ COPY requirements.txt /app/
 
 # Install dependencies
 RUN pip install --no-cache-dir -r /app/requirements.txt
-RUN pip install google-genai
 
 # Copy all source code
 COPY . /app/
