@@ -12,3 +12,4 @@ google-genai
 channels
 channels-redis
 uvicorn
+whitenoise
