@@ -12,7 +12,7 @@ services:
       - key: SECRET_KEY
         value: django-insecure-73e9o-^0hU5$Szo*1mj^pr5&$!s-ypf0d1&*!'ac-2mle00z_&(
       - key: DEBUG
-        value: False
+        value: True
       - key: DJANGO_ALLOWED_HOSTS
         value: airport-backend-ug6q.onrender.com
       - key: CSRF_TRUSTED_ORIGINS

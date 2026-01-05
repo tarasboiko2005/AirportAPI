@@ -1,10 +1,12 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from datetime import timedelta, time, datetime
+from datetime import timedelta, time, datetime, timezone as dt_timezone
 from django.contrib.auth import get_user_model
-from core.models import Country, Airport, Airline, Airplane, Flight, Ticket, Order
+from core.models import Country, Airport, Airline, Airplane, Flight, Ticket
+from orders.models import Order
 
 User = get_user_model()
+
 
 class Command(BaseCommand):
     help = "Seed test data: flights Lviv -> Krakow with tickets, orders, and superuser"
@@ -56,8 +58,12 @@ class Command(BaseCommand):
         # Flights for today, tomorrow, day after
         for offset in range(3):
             departure_date = (now + timedelta(days=offset)).date()
-            departure_dt = datetime.combine(departure_date, time(10, 0), tzinfo=timezone.utc)
-            arrival_dt = datetime.combine(departure_date, time(11, 0), tzinfo=timezone.utc)
+            departure_dt = datetime.combine(
+                departure_date, time(10, 0), tzinfo=dt_timezone.utc
+            )
+            arrival_dt = datetime.combine(
+                departure_date, time(11, 0), tzinfo=dt_timezone.utc
+            )
 
             flight, created = Flight.objects.get_or_create(
                 number=f"TA100{offset}",
@@ -83,13 +89,18 @@ class Command(BaseCommand):
                     seat_number=seat,
                     defaults={"price": 120.00, "status": "available"},
                 )
-                if i % 2 == 1:  # every second seat booked
+                if i % 2 == 1:  # кожне друге місце заброньоване
                     ticket.status = "booked"
                     ticket.save()
-                    Order.objects.get_or_create(
+                    order, _ = Order.objects.get_or_create(
                         user=user,
-                        ticket=ticket,
-                        defaults={"status": "confirmed"}
+                        defaults={
+                            "status": "confirmed",
+                            "amount": ticket.price,
+                            "currency": "USD"
+                        }
                     )
+                    order.tickets.add(ticket)
+                    order.save()
 
             self.stdout.write(self.style.SUCCESS(f"🎫 Tickets + Orders for {flight.number} created"))
