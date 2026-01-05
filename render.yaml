@@ -30,7 +30,7 @@ services:
       - key: GEMINI_API_KEY
         value: AIZaSyDM-ae61MRfd0VYDlnbg-ptIs1jZBqxLO4
       - key: GEMINI_API_URL
-        value: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
+        value: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
       - key: STRIPE_SECRET_KEY
         value: sk_test_xxx
       - key: STRIPE_PUBLISHABLE_KEY
