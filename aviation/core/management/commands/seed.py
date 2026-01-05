@@ -1,13 +1,13 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, time, datetime
 from django.contrib.auth import get_user_model
 from core.models import Country, Airport, Airline, Airplane, Flight, Ticket, Order
 
 User = get_user_model()
 
 class Command(BaseCommand):
-    help = "Seed test data: flights Lviv -> Krakow with tickets and orders"
+    help = "Seed test data: flights Lviv -> Krakow with tickets, orders, and superuser"
 
     def handle(self, *args, **options):
         now = timezone.now()
@@ -39,23 +39,36 @@ class Command(BaseCommand):
             defaults={"model": "Boeing 737", "seats_count": 180, "airline": airline},
         )
 
-        # User for orders
-        user, _ = User.objects.get_or_create(
+        # User (superuser for admin + orders)
+        user, created = User.objects.get_or_create(
             email="tarasboiko2005@gmail.com",
-            defaults={"username": "taras", "password": "test1234"}
+            defaults={"username": "taras"}
         )
+        if created:
+            user.set_password("Qwest2005")
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+            self.stdout.write(self.style.SUCCESS("✅ Superuser created"))
+        else:
+            self.stdout.write(self.style.WARNING("⚠️ User already exists"))
 
         # Flights for today, tomorrow, day after
         for offset in range(3):
-            departure = now + timedelta(days=offset)
+            departure_date = (now + timedelta(days=offset)).date()
+            departure_dt = datetime.combine(departure_date, time(10, 0), tzinfo=timezone.utc)
+            arrival_dt = datetime.combine(departure_date, time(11, 0), tzinfo=timezone.utc)
+
             flight, created = Flight.objects.get_or_create(
                 number=f"TA100{offset}",
                 origin=lviv_airport,
                 destination=krakow_airport,
-                departure_time=departure.replace(hour=10, minute=0, second=0, microsecond=0),
-                arrival_time=departure.replace(hour=11, minute=0, second=0, microsecond=0),
-                airplane=airplane,
-                status=Flight.Status.SCHEDULED,
+                defaults={
+                    "departure_time": departure_dt,
+                    "arrival_time": arrival_dt,
+                    "airplane": airplane,
+                    "status": Flight.Status.SCHEDULED,
+                },
             )
             if created:
                 self.stdout.write(self.style.SUCCESS(f"✅ Flight {flight.number} created"))
@@ -70,11 +83,9 @@ class Command(BaseCommand):
                     seat_number=seat,
                     defaults={"price": 120.00, "status": "available"},
                 )
-                # Mark some tickets as booked
                 if i % 2 == 1:  # every second seat booked
                     ticket.status = "booked"
                     ticket.save()
-                    # Create order for booked ticket
                     Order.objects.get_or_create(
                         user=user,
                         ticket=ticket,
