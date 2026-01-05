@@ -7,18 +7,14 @@ services:
       pip install -r requirements.txt
       python manage.py migrate
       python manage.py collectstatic --noinput
-    startCommand: |
-      python manage.py seed
-      uvicorn aviation.asgi:application --host 0.0.0.0 --port $PORT
+    startCommand: bash -c "python manage.py seed && uvicorn aviation.asgi:application --host 0.0.0.0 --port $PORT"
     envVars:
       - key: SECRET_KEY
-        sync: false
+        value: django-insecure-73e9o-^0hU5$Szo*1mj^pr5&$!s-ypf0d1&*!'ac-2mle00z_&(
       - key: DEBUG
         value: False
       - key: DJANGO_ALLOWED_HOSTS
         value: airport-backend-ug6q.onrender.com
-      - key: GEMINI_API_URL
-        value: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
       - key: CSRF_TRUSTED_ORIGINS
         value: https://airport-backend-ug6q.onrender.com
       - key: POSTGRES_DB
@@ -32,14 +28,16 @@ services:
       - key: POSTGRES_PORT
         value: 5432
       - key: GEMINI_API_KEY
-        sync: false
+        value: AIZaSyDM-ae61MRfd0VYDlnbg-ptIs1jZBqxLO4
+      - key: GEMINI_API_URL
+        value: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
       - key: STRIPE_SECRET_KEY
-        sync: false
+        value: sk_test_xxx
       - key: STRIPE_PUBLISHABLE_KEY
-        sync: false
+        value: pk_test_xxx
       - key: STRIPE_WEBHOOK_SECRET
-        sync: false
+        value: whsec_xxx
       - key: STRIPE_SUCCESS_URL
-        sync: false
+        value: https://airport-backend-ug6q.onrender.com/payments/success
       - key: STRIPE_CANCEL_URL
-        sync: false
+        value: https://airport-backend-ug6q.onrender.com/payments/cancel
