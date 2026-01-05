@@ -90,23 +90,6 @@ def get_ticket_details(flight_id: int):
     }
     return json.dumps(response)
 
-def map_intent(intent: dict):
-    raw_action = intent.get("action") or intent.get("intent") or intent.get("command") or "unknown"
-    params = intent.get("params") or intent.get("parameters") or {}
-
-    normalized = str(raw_action).strip().lower().replace("_", " ").replace("-", " ")
-
-    action_map = {
-        "search flights": "search_flights",
-        "find flights": "search_flights",
-        "get ticket details": "get_ticket_details",
-        "tickets": "get_ticket_details",
-        "get user orders": "get_user_orders",
-        "refusal": "refusal",
-    }
-
-    action = action_map.get(normalized, "unknown")
-    return action, params
 
 SUGGESTIONS = {
     "Flights": "Would you like to check available tickets for this flight?",
