@@ -22,15 +22,15 @@ services:
       - key: CSRF_TRUSTED_ORIGINS
         value: https://airport-backend-ug6q.onrender.com
       - key: POSTGRES_DB
-        sync: false
+        value: airportdb_bplb
       - key: POSTGRES_USER
-        sync: false
+        value: airportuser
       - key: POSTGRES_PASSWORD
-        sync: false
+        value: zBV0NzzRMSv8xQJsaKq3ZOj11T8T9Vd4
       - key: POSTGRES_HOST
-        sync: false
+        value: dpg-d5dqi6s6uk2gs7395kbfg-a
       - key: POSTGRES_PORT
-        sync: false
+        value: 5432
       - key: GEMINI_API_KEY
         sync: false
       - key: STRIPE_SECRET_KEY
