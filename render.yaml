@@ -15,6 +15,8 @@ services:
         value: False
       - key: DJANGO_ALLOWED_HOSTS
         value: airport-backend-ug6q.onrender.com
+      - key: GEMINI_API_URL
+        value: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
       - key: CSRF_TRUSTED_ORIGINS
         value: https://airport-backend-ug6q.onrender.com
       - key: POSTGRES_DB
