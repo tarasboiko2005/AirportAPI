@@ -8,3 +8,7 @@ django-debug-toolbar
 python-dotenv
 stripe
 gunicorn
+google-generativeai
+channels
+channels-redis
+uvicorn
