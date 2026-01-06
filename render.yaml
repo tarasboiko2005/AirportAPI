@@ -41,3 +41,10 @@ services:
         value: https://airport-backend-ug6q.onrender.com/payments/success
       - key: STRIPE_CANCEL_URL
         value: https://airport-backend-ug6q.onrender.com/payments/cancel
+      - key: REDIS_URL
+        fromService:
+          name: airport-redis
+          type: redis
+  - type: redis
+    name: airport-redis
+    ipAllowList: []
