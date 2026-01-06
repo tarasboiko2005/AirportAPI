@@ -1,0 +1,76 @@
+services:
+  # Django/ASGI web service
+  - type: web
+    name: airport-backend
+    env: python
+    autoDeploy: true
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py migrate
+      python manage.py collectstatic --noinput
+    startCommand: bash -c "python manage.py seed && uvicorn aviation.asgi:application --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: SECRET_KEY
+        value: django-insecure-73e9o-^0hU5$Szo*1mj^pr5&$!s-ypf0d1&*!'ac-2mle00z_&(
+      - key: DEBUG
+        value: True
+      - key: DJANGO_ALLOWED_HOSTS
+        value: airport-backend.onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://airport-backend.onrender.com
+      - key: GEMINI_API_KEY
+        value: AIZaSyDM-ae61MRfd0VYDlnbg-ptIs1jZBqxLO4
+      - key: GEMINI_API_URL
+        value: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+      - key: STRIPE_SECRET_KEY
+        value: sk_test_xxx
+      - key: STRIPE_PUBLISHABLE_KEY
+        value: pk_test_xxx
+      - key: STRIPE_WEBHOOK_SECRET
+        value: whsec_xxx
+      - key: STRIPE_SUCCESS_URL
+        value: https://airport-backend.onrender.com/payments/success
+      - key: STRIPE_CANCEL_URL
+        value: https://airport-backend.onrender.com/payments/cancel
+      - key: DATABASE_URL
+        fromService:
+          name: airport-db
+          type: postgresql
+      - key: REDIS_URL
+        fromService:
+          name: airport-redis
+          type: redis
+      - key: EMAIL_HOST_USER
+        value: tarasboiko2005@gmail.com
+      - key: EMAIL_HOST_PASSWORD
+        value: lanlykbeknbgzngd
+
+  # Celery worker service
+  - type: worker
+    name: airport-celery
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A aviation worker -l info
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          name: airport-db
+          type: postgresql
+      - key: REDIS_URL
+        fromService:
+          name: airport-redis
+          type: redis
+      - key: EMAIL_HOST_USER
+        value: tarasboiko2005@gmail.com
+      - key: EMAIL_HOST_PASSWORD
+        value: lanlykbeknbgzngd
+
+  # Redis broker service
+  - type: redis
+    name: airport-redis
+    ipAllowList: []
+
+  # PostgreSQL database service
+  - type: postgresql
+    name: airport-db
+    plan: free

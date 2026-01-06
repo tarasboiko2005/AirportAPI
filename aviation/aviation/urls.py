@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from aviation import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -19,6 +20,7 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('payments/', include('payments.urls')),
     path("api/assistant/", include("assistant.urls")),
+    path("test-email/", views.test_email, name="test_email"),
 ]
 
 if settings.DEBUG:
