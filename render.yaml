@@ -40,6 +40,10 @@ services:
         fromService:
           name: airport-redis
           type: redis
+      - key: EMAIL_HOST_USER
+        value: tarasboiko2005@gmail.com
+      - key: EMAIL_HOST_PASSWORD
+        value: lanlykbeknbgzngd
 
   # Celery worker service
   - type: worker
@@ -56,6 +60,10 @@ services:
         fromService:
           name: airport-redis
           type: redis
+      - key: EMAIL_HOST_USER
+        value: tarasboiko2005@gmail.com
+      - key: EMAIL_HOST_PASSWORD
+        value: lanlykbeknbgzngd
 
   # Redis broker service
   - type: redis
