@@ -13,9 +13,6 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 # Copy all source code
 COPY . /app/
 
-# Collect static files (WhiteNoise needs this)
-RUN python manage.py collectstatic --noinput
-
 # Expose port
 EXPOSE 8000
 

@@ -1,4 +1,5 @@
 services:
+  # Django/ASGI web service
   - type: web
     name: airport-backend
     env: python
@@ -14,19 +15,9 @@ services:
       - key: DEBUG
         value: True
       - key: DJANGO_ALLOWED_HOSTS
-        value: airport-backend-ug6q.onrender.com
+        value: airport-backend.onrender.com
       - key: CSRF_TRUSTED_ORIGINS
-        value: https://airport-backend-ug6q.onrender.com
-      - key: POSTGRES_DB
-        value: airportdb_bplb
-      - key: POSTGRES_USER
-        value: airportuser
-      - key: POSTGRES_PASSWORD
-        value: zBV0NzzRMSv8xQJsaKq3ZOj11T8T9Vd4
-      - key: POSTGRES_HOST
-        value: dpg-d5dqi6s6uk2gs7395kbfg-a
-      - key: POSTGRES_PORT
-        value: 5432
+        value: https://airport-backend.onrender.com
       - key: GEMINI_API_KEY
         value: AIZaSyDM-ae61MRfd0VYDlnbg-ptIs1jZBqxLO4
       - key: GEMINI_API_URL
@@ -38,13 +29,40 @@ services:
       - key: STRIPE_WEBHOOK_SECRET
         value: whsec_xxx
       - key: STRIPE_SUCCESS_URL
-        value: https://airport-backend-ug6q.onrender.com/payments/success
+        value: https://airport-backend.onrender.com/payments/success
       - key: STRIPE_CANCEL_URL
-        value: https://airport-backend-ug6q.onrender.com/payments/cancel
+        value: https://airport-backend.onrender.com/payments/cancel
+      - key: DATABASE_URL
+        fromService:
+          name: airport-db
+          type: postgresql
       - key: REDIS_URL
         fromService:
           name: airport-redis
           type: redis
+
+  # Celery worker service
+  - type: worker
+    name: airport-celery
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A aviation worker -l info
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          name: airport-db
+          type: postgresql
+      - key: REDIS_URL
+        fromService:
+          name: airport-redis
+          type: redis
+
+  # Redis broker service
   - type: redis
     name: airport-redis
     ipAllowList: []
+
+  # PostgreSQL database service
+  - type: postgresql
+    name: airport-db
+    plan: free
