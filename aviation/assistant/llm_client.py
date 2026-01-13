@@ -63,7 +63,7 @@ class AIService:
             logger.exception("LLM error")
             return "<p>LLM service temporarily unavailable.</p>"
 
-async def stream_response(prompt: str):
+def stream_response(prompt: str):
     client = get_client()
     response = client.models.generate_content_stream(
         model="models/gemini-flash-latest",
