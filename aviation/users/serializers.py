@@ -25,7 +25,22 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    orders = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'date_joined', 'orders']
+
+    def get_orders(self, obj):
+        from orders.models import Order
+        from orders.serializers import OrderSerializer
+        orders = Order.objects.filter(user=obj).order_by('-created_at')
+        return OrderSerializer(orders, many=True, context=self.context).data

@@ -1,20 +1,96 @@
+# ========================
 # Python
+# ========================
 *.pyc
+*.pyo
+*.pyd
 __pycache__/
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
 
 # Virtual environment
 .venv/
+venv/
+env/
+ENV/
 
+# ========================
 # Django
+# ========================
 db.sqlite3
+db.sqlite3-journal
 *.log
+debug.log
+aviation/staticfiles/
+aviation/media/
+*.mo
 
-# IDE
+# ========================
+# Node / Frontend
+# ========================
+node_modules/
+airport-ui/node_modules/
+airport-ui/dist/
+.npm
+.eslintcache
+*.tsbuildinfo
+
+# ========================
+# IDE / Editors
+# ========================
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ========================
+# Environment & Secrets
+# ========================
 .env
+.env.local
+.env.*.local
+.env.production
+.env.staging
 
-# Django logs
-debug.log
+# ========================
+# OS Files
+# ========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+ehthumbs_vista.db
 
-aviation/staticfiles/
+# ========================
+# Docker
+# ========================
+postgres_data/
+
+# ========================
+# Testing / Coverage
+# ========================
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+.tox/
+coverage.xml
+nosetests.xml
+
+# ========================
+# Misc
+# ========================
+*.bak
+*.tmp
+*.temp
+*.orig
+package-lock.json

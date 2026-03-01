@@ -95,9 +95,10 @@ class Command(BaseCommand):
                     order, _ = Order.objects.get_or_create(
                         user=user,
                         defaults={
-                            "status": "confirmed",
+                            "status": "completed",
                             "amount": ticket.price,
-                            "currency": "USD"
+                            "currency": "USD",
+                            "payment_method": "card",
                         }
                     )
                     order.tickets.add(ticket)

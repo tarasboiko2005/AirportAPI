@@ -9,6 +9,8 @@ class Airport(models.Model):
     name = models.CharField(max_length=100)
     iata_code = models.CharField(max_length=3, unique=True)
     country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name='airports')
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     def __str__(self): return f"{self.name} ({self.iata_code})"
 
 class Airline(models.Model):

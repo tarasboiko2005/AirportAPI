@@ -14,3 +14,4 @@ channels-redis
 uvicorn
 whitenoise
 celery[redis]==5.3.6
+django-cors-headers

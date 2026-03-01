@@ -174,7 +174,15 @@ class TicketListView(APIView):
 
     @extend_schema(operation_id="tickets_list")
     def get(self, request):
-        tickets = Ticket.objects.select_related('flight', 'order').all()
+        tickets = Ticket.objects.select_related(
+            'flight', 'flight__origin', 'flight__destination', 'order'
+        ).all()
+        flight_id = request.query_params.get('flight')
+        if flight_id:
+            tickets = tickets.filter(flight_id=flight_id)
+        status = request.query_params.get('status')
+        if status:
+            tickets = tickets.filter(status=status)
         serializer = self.serializer_class(tickets, many=True)
         return Response(serializer.data)
 

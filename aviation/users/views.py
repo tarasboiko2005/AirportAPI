@@ -1,12 +1,13 @@
 from rest_framework import generics, viewsets, status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from drf_spectacular.utils import extend_schema, extend_schema_view
 import logging
 
 from .models import User
-from .serializers import RegisterSerializer, UserSerializer
+from .serializers import RegisterSerializer, UserSerializer, UserProfileSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -59,3 +60,13 @@ class LoginView(TokenObtainPairView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+@extend_schema(tags=['Users'])
+class UserProfileView(generics.RetrieveAPIView):
+    """Returns current user's profile with orders & tickets."""
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user

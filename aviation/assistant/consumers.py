@@ -12,7 +12,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
         await self.send(text_data=json.dumps({
             'type': 'connection_established',
-            'message': f"<p>Connected as <b>{getattr(self.user, 'username', 'anonymous')}</b></p>"
+            'message': f"Connected as {getattr(self.user, 'username', 'anonymous')}"
         }))
 
     async def receive(self, text_data):
@@ -22,7 +22,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             await self.send(text_data=json.dumps({
                 'type': 'chat',
-                'message': f"<p>You: {user_msg}</p>"
+                'role': 'user',
+                'message': user_msg
             }))
 
             from asgiref.sync import sync_to_async
@@ -30,11 +31,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             await self.send(text_data=json.dumps({
                 'type': 'chat',
-                'message': f"<p>Chat: {chat_answer}</p>"
+                'role': 'bot',
+                'message': chat_answer
             }))
         except Exception as e:
             logger.error(f"WS receive error: {e}")
             await self.send(text_data=json.dumps({
                 'type': 'error',
-                'message': f"<p>Error: {e}</p>"
+                'message': f"An error occurred: {e}"
             }))

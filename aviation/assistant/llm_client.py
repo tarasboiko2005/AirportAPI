@@ -4,7 +4,14 @@ import logging
 from django.conf import settings
 from google import genai
 from google.genai.types import GenerateContentConfig, AutomaticFunctionCallingConfig
-from .tools import search_flights, get_ticket_details, get_user_orders
+from .tools import (
+    search_flights,
+    get_ticket_details,
+    get_user_orders,
+    search_airports,
+    search_airlines,
+    get_weather,
+)
 
 logger = logging.getLogger("assistant")
 
@@ -43,10 +50,17 @@ class AIService:
 
         self.client = get_client()
         self.config = GenerateContentConfig(
-            tools=[search_flights, get_ticket_details, get_user_orders],
+            tools=[
+                search_flights,
+                get_ticket_details,
+                get_user_orders,
+                search_airports,
+                search_airlines,
+                get_weather,
+            ],
             automatic_function_calling=AutomaticFunctionCallingConfig(
                 disable=False,
-                maximum_remote_calls=3,
+                maximum_remote_calls=5,
             ),
             system_instruction=system_instruction,
         )
@@ -58,24 +72,10 @@ class AIService:
     def get_response(self, user_message: str) -> str:
         try:
             response = self.chat.send_message(user_message)
-            return response.text
+            text = response.text or ""
+            # Strip any stray HTML tags the model may produce
+            text = text.strip()
+            return text
         except Exception:
             logger.exception("LLM error")
-            return "<p>LLM service temporarily unavailable.</p>"
-
-def stream_response(prompt: str):
-    client = get_client()
-    response = client.models.generate_content_stream(
-        model="models/gemini-flash-latest",
-        contents=prompt,
-    )
-
-    for chunk in response:
-        try:
-            for candidate in chunk.candidates or []:
-                for part in candidate.content.parts or []:
-                    if hasattr(part, "text") and part.text:
-                        yield part.text
-        except Exception:
-            logger.exception("Stream chunk parse failed")
-            continue
+            return "The AI assistant is temporarily unavailable. Please try again later."

@@ -150,7 +150,7 @@ class StripeWebhookView(APIView):
                     payment.currency = currency.upper()
                 payment.save()
 
-                order.status = "completed"
+                order.status = "paid"
                 order.save()
                 logger.info("Payment and Order updated successfully")
 

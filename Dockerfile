@@ -1,20 +1,24 @@
-# Use official Python image
 FROM python:3.13-slim
 
-# Set working directory
-WORKDIR /app/aviation/
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Copy requirements
-COPY requirements.txt /app/
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-RUN pip install --no-cache-dir -r /app/requirements.txt
+WORKDIR /app
 
-# Copy all source code
-COPY . /app/
+COPY requirements.txt .
 
-# Expose port
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+WORKDIR /app/aviation
+
 EXPOSE 8000
 
-# Run server (ASGI via Uvicorn)
 CMD ["uvicorn", "aviation.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
