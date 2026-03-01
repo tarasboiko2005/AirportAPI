@@ -1,0 +1,12 @@
+*.roff linguist-detectable=false
+*.man linguist-detectable=false
+*.1 linguist-detectable=false
+*.3 linguist-detectable=false
+
+airport-ui/** linguist-detectable=true
+
+dist/* linguist-vendored
+build/* linguist-vendored
+
+*.jsx linguist-language=JavaScript
+*.js linguist-language=JavaScript
